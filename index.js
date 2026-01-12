@@ -1,20 +1,28 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
+    // CORS bypass aur Headers set karna
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
+
     const { prompt } = req.query;
 
     if (!prompt) {
-        return res.status(400).send("Error: Prompt dena zaroori hai bhai! Example: ?prompt=hello");
+        return res.status(400).json({
+            status: false,
+            error: "Prompt missing! Example: ?prompt=hello",
+            developer: "DEVELOPER AKASHHACKER"
+        });
     }
 
     try {
-        // Original worker ko call kiya
+        // Original worker API call
         const response = await axios.get(`https://gpt-3-5.apis-bj-devs.workers.dev/?prompt=${encodeURIComponent(prompt)}`);
         
-        // Agar response content hai toh woh, nahi toh pura data
+        // Data extraction
         const result = response.data.content || response.data;
 
-        // Aapka Custom Response with Branding
+        // Success response
         res.status(200).json({
             status: true,
             developer: "DEVELOPER AKASHHACKER",
@@ -22,6 +30,11 @@ module.exports = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).send("API Error: Worker response nahi de raha.");
+        // Detailed error for debugging
+        res.status(500).json({
+            status: false,
+            error: "Worker API is not responding. Please try again later.",
+            developer: "DEVELOPER AKASHHACKER"
+        });
     }
 };
